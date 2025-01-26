@@ -1,7 +1,7 @@
 # Train Station Spatial Database
 #### UCL CEGE0052 Spatial Databases and Data Management project
-In this project, I created a spatial database and populated it with train stations, entrances, and ticket barriers. Non-spatial data within the database included tickets, customers, and transactions. Transactions were linked to customers, tickets, ticket barriers, entrances, and stations. 
-Queries were also written to provide information for decision making. Some are maintenance oriented, for example viewing the ticket barriers with the highest failure rate for transactions. Others serve other purposes; such as retrieving the average age of customers passing through each station at each hour of the day, in order to best target station advertisements.
+In this project, I created a spatial database in PostgreSQL and populated it with train stations, entrances, and ticket barriers. Non-spatial data within the database included tickets, customers, and transactions. Transactions were linked to customers, tickets, ticket barriers, entrances, and stations. Physical assets nested within each other (station->entrance->ticket barrier) are also linked.
+Queries were written to provide information for decision making. Some are maintenance oriented, for example viewing the ticket barriers with the highest failure rate for transactions. Others queries include retrieving the average age of customers passing through each station at each hour of the day, in order to best target station advertisements.
 
 I recommend viewing the files in this order:
 1. Create table
