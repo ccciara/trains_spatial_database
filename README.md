@@ -1,6 +1,6 @@
 # Train Station Spatial Database
 In this project, I created a spatial database and populated it with train stations, entrances, and ticket barriers. Non-spatial data within the database included tickets, customers, and transactions. Transactions were linked to customers, tickets, ticket barrier, entrance, and station. 
-Queries were also written to provide helpful views of the data. Some are maintenance oriented, for example viewing the ticket barriers with the highest failure rate for transactions. Others serve other purposes; for example a query to show the average age of customers passing through each station at each hour of the day, in order to best target station advertisements.
+Queries were also written to provide information for decision making. Some are maintenance oriented, for example viewing the ticket barriers with the highest failure rate for transactions. Others serve other purposes; for example a query to show the average age of customers passing through each station at each hour of the day, in order to best target station advertisements.
 
 I recommend viewing the files in this order:
 1. Create table
