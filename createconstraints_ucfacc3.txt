@@ -1,0 +1,39 @@
+--PRIMARY KEYS
+
+alter table ucfacc3.stations add constraint station_pk primary key (station_id);
+alter table ucfacc3.entrances add constraint entrance_pk primary key (entrance_id);
+alter table ucfacc3.ticket_barriers add constraint ticket_barrier_pk primary key (ticket_barrier_id);
+alter table ucfacc3.transactions add constraint transaction_pk primary key (transaction_id);
+alter table ucfacc3.customers add constraint customer_pk primary key (customer_id);
+alter table ucfacc3.parameters add constraint parameter_pk primary key (parameter_id);
+
+--FOREIGN KEYS
+
+alter table ucfacc3.entrances add constraint station_entrance_fk
+foreign key (station_id) references ucfacc3.stations(station_id);
+
+alter table ucfacc3.ticket_barriers add constraint entrance_ticket_barrier_fk
+foreign key (entrance_id) references ucfacc3.entrances(entrance_id);
+
+alter table ucfacc3.transactions add constraint ticket_barrier_transaction_fk
+foreign key (ticket_barrier_id) references ucfacc3.ticket_barriers(ticket_barrier_id);
+
+alter table ucfacc3.transactions add constraint customer_transaction_fk
+foreign key (customer_id) references ucfacc3.customers(customer_id);
+
+
+--UNIQUE CONSTRAINTS
+
+alter table ucfacc3.stations add constraint station_unique unique(name, location);
+
+alter table ucfacc3.entrances add constraint entrance_unique unique(name, location);
+
+alter table ucfacc3.ticket_barriers add constraint ticket_barrier_unique unique(location);
+
+alter table ucfacc3.transactions add constraint transactions_unique_ticketbarrier unique(transaction_time, ticket_barrier_id);
+
+alter table ucfacc3.transactions add constraint transactions_unique_customer unique(transaction_time, customer_id);
+
+alter table ucfacc3.customers add constraint customer_unique_payment_details unique(payment_details);
+
+alter table ucfacc3.customers add constraint customer_unique_customer unique(first_name, last_name, date_of_birth, post_code);

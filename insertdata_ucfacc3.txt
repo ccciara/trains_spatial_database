@@ -1,0 +1,388 @@
+
+--insert parameters
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('cost', 'ticket_barrier', 'standard model', '1000', '£ per unit', '2015-January-01');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('cost', 'ticket_barrier', 'accessible model', '2000', '£ per unit', '2015-January-01');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units)
+values
+('cost', 'ticket_barrier', 'standard model', '2000', '£ per unit');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units)
+values
+('cost', 'ticket_barrier', 'accessible model', '3000', '£ per unit');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units)
+values
+('fault', 'ticket_barrier', 'replacement age', '10', 'years');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units)
+values
+('fault', 'ticket_barrier', 'unacceptable failure rate', '10', 'percent');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('price', 'ticket', 'standard', '2', '£', '2015-January-01');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('price', 'ticket', 'premium', '3', '£', '2015-January-01');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('price', 'ticket', 'standard', '3', '£', '2020-January-01');
+
+insert into ucfacc3.parameters
+(parameter_type, parameter_name, parameter_subname, parameter_value, parameter_units, date_created)
+values
+('price', 'ticket', 'premium', '4', '£', '2020-January-01');
+
+-- insert stations
+
+insert into ucfacc3.stations
+(name, year_opened, location)
+values
+('Green Station', 
+'1999', 
+st_extrude(st_geomfromtext('POLYGON ((300 200 0, 300 2200 0, 1600 2200 0, 1600 200 0, 300 200 0))', 27700), 0, 0, 600));
+
+insert into ucfacc3.stations
+(name, year_opened, location)
+values
+('Blue Station', 
+'1969', 
+st_extrude(st_geomfromtext('POLYGON ((10300 10200 0, 10300 12200 0, 11600 12200 0, 11600 10200 0, 10300 10200 0))', 27700), 0, 0, 600));
+
+-- insert entrances
+
+insert into ucfacc3.entrances
+(name, station_id, location)
+values
+('Novel Entrance', 
+(select station_id from ucfacc3.stations x where st_3dintersects(x.location, st_geomfromtext('POLYGON((400 1800 0, 400 2000 0, 1200 2000 0, 1200 1800 0, 400 1800 0))',27700))), 
+st_extrude(st_geomfromtext('POLYGON ((400 1800 0, 400 2200 0, 1400 2200 0, 1400 1800 0, 400 1800 0))', 27700), 0, 0, 200));
+
+insert into ucfacc3.entrances
+(name, station_id, location)
+values
+('Seal Entrance', 
+(select station_id from ucfacc3.stations x where st_3dintersects(x.location, st_geomfromtext('POLYGON((400 200 0, 400 400 0, 1200 400 0, 1200 200 0, 400 200 0))',27700))), 
+st_extrude(st_geomfromtext('POLYGON ((400 200 0, 400 400 0, 1400 400 0, 1400 200 0, 400 200 0))', 27700), 0, 0, 200));
+
+insert into ucfacc3.entrances
+(name, station_id, location)
+values
+('Excerpt Entrance', 
+(select station_id from ucfacc3.stations x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10400 11800 0, 10400 12000 0, 11200 12000 0, 11200 11800 0, 10400 11800 0))',27700))), 
+st_extrude(st_geomfromtext('POLYGON ((10400 11800 0, 10400 12200 0, 11400 12200 0, 11400 11800 0, 10400 11800 0))', 27700), 0, 0, 200));
+
+insert into ucfacc3.entrances
+(name, station_id, location)
+values
+('Wharf Entrance', 
+(select station_id from ucfacc3.stations x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10400 10200 0, 10400 10400 0, 11200 10400 0, 11200 10200 0, 10400 10200 0))',27700))), 
+st_extrude(st_geomfromtext('POLYGON ((10400 10200 0, 10400 10400 0, 11400 10400 0, 11400 10200 0, 10400 10200 0))', 27700), 0, 0, 200));
+
+--insert ticket barriers
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GN12', '12-April-2021', 'standard model',
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((500 1900 0, 500 1950 0, 700 1950 0, 700 1900 0, 500 1900 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((500 1900 0, 500 1950 0, 700 1950 0, 700 1900 0, 500 1900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GN7', '14-March-2018', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((800 1900 0, 800 1950 0, 1000 1950 0, 1000 1900 0, 800 1900 0))', 27700))), 
+st_extrude(st_geomfromtext('POLYGON((800 1900 0, 800 1950 0, 1000 1950 0, 1000 1900 0, 800 1900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GN4', '06-January-2022', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((1100 1900 0, 1100 1950 0, 1300 1950 0, 1300 1900 0, 1100 1900 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((1100 1900 0, 1100 1950 0, 1300 1950 0, 1300 1900 0, 1100 1900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GS13', '20-February-2010', 'accessible model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((500 300 0, 500 350 0, 700 350 0, 700 300 0, 500 300 0))', 27700))), 
+st_extrude(st_geomfromtext('POLYGON((500 300 0, 500 350 0, 700 350 0, 700 300 0, 500 300 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GS2', '12-April-2013', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((800 300 0, 800 350 0, 1000 350 0, 1000 300 0, 800 300 0))', 27700))), 
+st_extrude(st_geomfromtext('POLYGON((800 300 0, 800 350 0, 1000 350 0, 1000 300 0, 800 300 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('GS6', '15-June-2020', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((1100 300 0, 1100 350 0, 1300 350 0, 1300 300 0, 1100 300 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((1100 300 0, 1100 350 0, 1300 350 0, 1300 300 0, 1100 300 0))', 27700), 0, 0, 	100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BE9', '30-December-2009', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10500 11900 0, 10500 11950 0, 10700 11950 0, 10700 11900 0, 10500 11900 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((10500 11900 0, 10500 11950 0, 10700 11950 0, 10700 11900 0, 10500 11900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BE8', '19-May-2013', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10800 11900 0, 10800 11950 0, 11000 11950 0, 11000 11900 0, 10800 11900 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((10800 11900 0, 10800 11950 0, 11000 11950 0, 11000 11900 0, 10800 11900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BE11', '01-June-2012', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((11100 11900 0, 11100 11950 0, 11300 11950 0, 11300 11900 0, 11100 11900 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((11100 11900 0, 11100 11950 0, 11300 11950 0, 11300 11900 0, 11100 11900 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BW4', '12-April-2020', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10500 10300 0, 10500 10350 0, 10700 10350 0, 10700 10300 0, 10500 10300 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((10500 10300 0, 10500 10350 0, 10700 10350 0, 10700 10300 0, 10500 10300 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BW2', '12-October-2023', 'standard model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((10800 10300 0, 10800 10350 0, 11000 10350 0, 11000 10300 0, 10800 10300 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((10800 10300 0, 10800 10350 0, 11000 10350 0, 11000 10300 0, 10800 10300 0))', 27700), 0, 0, 100));
+
+insert into ucfacc3.ticket_barriers
+(name, date_installed, model, entrance_id, location)
+values
+('BW5', '12-October-2014', 'accessible model', 
+(select entrance_id from ucfacc3.entrances x where st_3dintersects(x.location, st_geomfromtext('POLYGON((11100 10300 0, 11100 10350 0, 11300 10350 0, 11300 10300 0, 11100 10300 0))', 27700))),
+st_extrude(st_geomfromtext('POLYGON((11100 10300 0, 11100 10350 0, 11300 10350 0, 11300 10300 0, 11100 10300 0))', 27700), 0, 0, 100));
+
+-- insert customers
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('3498723094555832', 'Cora', 'Jenkins', '1 Waverly Road', '89D M30', '12-January-1976');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('9876543210987654', 'Alice', 'Smith', '456 Oak Avenue', '67F P34', '18-July-1990');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('1111222233334444', 'Bob', 'Johnson', '789 Pine Lane', '89G Q56', '22-September-1982');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('4444333322221111', 'Eva', 'Williams', '101 Cedar Street', '12H R78', '14-May-1977');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('5555666677778888', 'Daniel', 'Miller', '202 Elm Court', '34I S90', '30-November-1995');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('8888777766665555', 'Sophia', 'Anderson', '303 Birch Road', '56J T01', '08-April-1988');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('2222111133334444', 'Oliver', 'Taylor', '404 Maple Drive', '78K U23', '03-June-1974');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('6666555544443333', 'Mia', 'Brown', '505 Spruce Place', '90L V45', '20-October-1992');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('3333444455556666', 'Liam', 'Davis', '606 Pine Lane', '12M W67', '11-February-1980');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('7777666655554444', 'Emma', 'Garcia', '707 Oak Avenue', '34N X89', '25-July-1993');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('9999888877776666', 'Aiden', 'Rodriguez', '808 Cedar Street', '56O Y01', '19-December-1986');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('1234123412341234', 'Ava', 'Martinez', '909 Elm Court', '78P Z23', '02-August-1997');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('5678567856785678', 'Noah', 'Hernandez', '010 Birch Road', '90Q A45', '15-September-1979');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('8765876587658765', 'Isabella', 'Lopez', '111 Maple Drive', '12R B67', '07-January-1998');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('3456345634563456', 'Ethan', 'White', '212 Spruce Place', '34S C89', '23-March-1983');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('7890789078907890', 'Olivia', 'Allen', '313 Pine Lane', '56T D01', '10-July-1991');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('2345234523452345', 'Lucas', 'Lee', '414 Oak Avenue', '78U E23', '14-October-1984');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('8909890989098909', 'Sophie', 'Scott', '515 Cedar Street', '90V F45', '28-April-1996');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('4567456745674567', 'Jackson', 'Young', '616 Elm Court', '12W G67', '06-February-1981');
+
+insert into ucfacc3.customers
+(payment_details, first_name, last_name, address_line_1, post_code, date_of_birth)
+values
+('1231231231231231', 'Lily', 'King', '717 Birch Road', '34X H89', '17-May-1994');
+
+-- insert transactions
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2017-09-08 14:10:30', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BE9'), (select customer_id from ucfacc3.customers where payment_details = '4444333322221111'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2019-06-21 08:55:45', '0', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BW2'), (select customer_id from ucfacc3.customers where payment_details = '6666555544443333'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2020-03-12 12:37:18', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS13'), (select customer_id from ucfacc3.customers where payment_details = '3333444455556666'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2018-10-05 17:22:50', '0', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GN7'), (select customer_id from ucfacc3.customers where payment_details = '7777666655554444'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2021-04-15 09:03:27', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BE11'), (select customer_id from ucfacc3.customers where payment_details = '9999888877776666'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2019-11-28 20:45:14', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS2'), (select customer_id from ucfacc3.customers where payment_details = '1234123412341234'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2018-02-19 11:18:05', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BW4'), (select customer_id from ucfacc3.customers where payment_details = '5678567856785678'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2020-07-03 16:30:42', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS6'), (select customer_id from ucfacc3.customers where payment_details = '8765876587658765'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2017-12-10 13:55:29', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GN4'), (select customer_id from ucfacc3.customers where payment_details = '3456345634563456'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2022-01-25 10:08:36', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BW5'), (select customer_id from ucfacc3.customers where payment_details = '7890789078907890'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2019-08-14 16:45:55', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BE8'), (select customer_id from ucfacc3.customers where payment_details = '2345234523452345'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2020-05-02 09:27:14', '0', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS6'), (select customer_id from ucfacc3.customers where payment_details = '8909890989098909'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2018-12-19 14:55:40', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GN12'), (select customer_id from ucfacc3.customers where payment_details = '4567456745674567'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2021-02-28 18:10:22', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BW4'), (select customer_id from ucfacc3.customers where payment_details = '1231231231231231'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2019-10-07 11:37:03', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GN7'), (select customer_id from ucfacc3.customers where payment_details = '3498723094555832'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2020-06-15 13:20:48', '0', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BE11'), (select customer_id from ucfacc3.customers where payment_details = '9876543210987654'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2017-11-25 17:42:30', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BW5'), (select customer_id from ucfacc3.customers where payment_details = '1111222233334444'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2021-03-08 08:03:17', '1', '0', 'standard', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS2'), (select customer_id from ucfacc3.customers where payment_details = '5555666677778888'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2018-09-12 20:15:05', '1', '1', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'BE9'), (select customer_id from ucfacc3.customers where payment_details = '8888777766665555'));
+
+insert into ucfacc3.transactions
+(transaction_time, success_failure, entry_exit, ticket_type, ticket_barrier_id, customer_id)
+values
+('2022-04-30 09:48:36', '0', '0', 'premium', (select ticket_barrier_id from ucfacc3.ticket_barriers where name = 'GS13'), (select customer_id from ucfacc3.customers where payment_details = '2222111133334444'));

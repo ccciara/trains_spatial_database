@@ -1,0 +1,179 @@
+-- Decision 1
+-- Which ticket barriers are used most often and thus need to be maintained more often or updated?
+
+select * from ucfacc3.ticket_barrier_profits;
+
+
+-- Decision 2
+-- Which station entrances are used most often, and how much money are they collecting? They may have need and budget for upgrades and more frequent maintenance to keep up with foot traffic.
+
+select * from ucfacc3.entrance_profits;
+
+
+-- Decision 3
+-- Which stations are used most often, and how much money are they collecting? Increased demand in a stations' area could warrant an updated station or even another station in the region.
+
+select * from ucfacc3.station_profits;
+
+-- Decision 4
+-- Which ticket barriers have an unacceptable failure rate and thus need to be replaced, and where are they?
+
+-- calculate failure rates for ticket barriers
+with ticket_barrier_failure_rate as (
+  select
+    tb.ticket_barrier_id,
+    -- get failure rate: count of failed transactions (%) for each barrier
+    count(*) filter (where t.success_failure = '0') * 100.0 / count(*) as failure_rate
+  from
+    ucfacc3.transactions t
+    -- join with ticket barriers to match transactions to barriers
+    left join ucfacc3.ticket_barriers tb on t.ticket_barrier_id = tb.ticket_barrier_id
+  group by
+    tb.ticket_barrier_id
+),
+
+-- get threshold for unacceptable failure rate from parameters
+unacceptable_failure_rate as (
+  select
+    parameter_value
+  from
+    ucfacc3.latest_parameters
+  where
+    parameter_name = 'ticket_barrier'
+    and parameter_subname = 'unacceptable failure rate'
+)
+
+-- select barriers with failure rates exceeding the unacceptable threshold
+select
+  s.name as station_name,
+  e.name as entrance_name,
+  tb.name as ticket_barrier_name,
+  tbf.failure_rate,
+  -- check if failure rate exceeds threshold
+  tbf.failure_rate > (select ufr.parameter_value from unacceptable_failure_rate ufr) as at_unacceptable_failure_rate,
+  tb.location
+from
+  ucfacc3.ticket_barriers tb
+  -- join with failure rates and entrance data
+  left join ticket_barrier_failure_rate tbf on tb.ticket_barrier_id = tbf.ticket_barrier_id
+  left join ucfacc3.entrances e on tb.entrance_id = e.entrance_id
+  left join ucfacc3.stations s on e.station_id = s.station_id
+order by
+  e.station_id, tb.ticket_barrier_id;
+
+
+-- Decision 5
+-- Which ticket barriers are out of date and thus need to be replaced, and where are they?
+
+-- get replacement age from latest parameters
+with replacement_age_parameter as (
+  select
+    parameter_value::int as replacement_age
+  from
+    ucfacc3.latest_parameters
+  where
+    parameter_name = 'ticket_barrier'
+    and parameter_subname = 'replacement age'
+)
+
+-- select outdated barriers based on replacement age
+select
+  s.name as station_name,
+  e.name as entrance_name,
+  tb.name as ticket_barrier_name,
+  tb.date_installed,
+  -- calculate age
+  extract(year from current_date) - extract(year from tb.date_installed::date) as years_in_use,
+  -- determine if age is greater than replacement age
+  (
+    extract(year from current_date) - extract(year from tb.date_installed::date) >= replacement_age
+  )::text as needs_replacement,
+  tb.location
+from
+  ucfacc3.ticket_barriers tb
+  -- join with entrances and stations for location
+  join ucfacc3.entrances e on tb.entrance_id = e.entrance_id
+  join ucfacc3.stations s on e.station_id = s.station_id,
+  replacement_age_parameter;
+
+
+-- Decision 6
+-- In order to best target station advertisements, what is the average age if customers at each station during each hour of the day?
+
+-- calculate customer ages
+with customer_age as (
+  select
+    customer_id,
+    date_of_birth,
+    extract(year from age(current_date, date_of_birth)) as age
+  from
+    ucfacc3.customers
+),
+
+transaction_hour as (
+  select
+    t.customer_id,
+    -- get transaction hour
+    extract(hour from t.transaction_time) as transaction_hour,
+    tb.entrance_id
+  from
+    ucfacc3.transactions t
+    -- join with ticket barriers for location
+    join ucfacc3.ticket_barriers tb on t.ticket_barrier_id = tb.ticket_barrier_id
+)
+
+-- calculate average age per hour per station
+select
+  ta.transaction_hour,
+  s.name as station_name,
+  -- average customer age
+  avg(ca.age) as average_customer_age
+from
+  customer_age ca
+  -- join to match customers with transactions and stations
+  join transaction_hour ta on ca.customer_id = ta.customer_id
+  join ucfacc3.entrances e on ta.entrance_id = e.entrance_id
+  join ucfacc3.stations s on e.station_id = s.station_id
+group by
+  s.name,
+  ta.transaction_hour
+order by
+  ta.transaction_hour;
+
+
+-- Decision 7
+-- How much would it cost to replace all of the ticket barriers for each station entrance?
+
+calculate replacement cost for each barrier
+with replacement_cost as (
+    -- select barrier types
+    select distinct on (tb.name)
+        tb.name as ticket_barrier_name,
+        tb.model,
+        -- get cost from latest parameters
+        lp.parameter_value::int as cost,
+        tb.entrance_id,
+        tb.location
+    from
+        ucfacc3.ticket_barriers tb
+        -- join with parameters to get cost
+        join ucfacc3.latest_parameters lp on tb.model = lp.parameter_subname
+        and lp.parameter_type = 'cost'
+        and lp.parameter_name = 'ticket_barrier'
+    order by
+        tb.name desc
+)
+
+-- sum replacement costs per entrance
+select
+    s.name as station_name,
+  e.name as entrance_name,
+    -- sum of costs for barriers at each entrance
+    sum(rc.cost) as ticket_barrier_replacement_cost_per_entrance
+from
+    replacement_cost rc
+    -- join with entrances and stations for location
+    join ucfacc3.entrances e on rc.entrance_id = e.entrance_id
+    join ucfacc3.stations s on e.station_id = s.station_id
+group by
+    s.name, e.name;

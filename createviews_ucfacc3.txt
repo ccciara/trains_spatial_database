@@ -1,0 +1,133 @@
+-- latest parameters view
+
+create view ucfacc3.latest_parameters as
+select
+*
+from
+-- select all columns from parameters
+(select
+    a.parameter_type,
+    a.parameter_name,
+    a.parameter_subname,
+    a.parameter_value,
+    a.parameter_units,
+    a.date_created
+
+from
+ucfacc3.parameters a 
+
+where
+-- where date created is most recent
+a.date_created = 
+    (select max(b.date_created)
+    from ucfacc3.parameters b
+    -- select unique parameter types
+    where a.parameter_type = b.parameter_type
+    and a.parameter_name = b.parameter_name
+    and a.parameter_subname = b.parameter_subname)) 
+
+as latest_parameters;
+
+
+-- ticket barrier profit view
+
+create view ucfacc3.ticket_barrier_profits as
+select
+t.ticket_barrier_id,
+tb.name as ticket_barrier_name,
+-- sum of profits for each ticket type
+sum((select parameter_value
+    from ucfacc3.parameters p
+    where
+    -- find the price per ticket type at the time of sale
+    p.parameter_subname = t.ticket_type
+    and p.date_created <= t.transaction_time
+    order by p.date_created desc
+    limit 1)::numeric) 
+as total_profit,
+-- get currency unit
+(select p.parameter_units
+    from ucfacc3.parameters p
+    where p.parameter_subname = t.ticket_type
+    limit 1) 
+as currency,
+-- count of tickets sold
+count(t.ticket_type) as tickets_sold,
+tb.location
+
+from
+ucfacc3.transactions t
+-- join with ticket barriers
+join
+ucfacc3.ticket_barriers tb on t.ticket_barrier_id = tb.ticket_barrier_id
+-- join with parameters for prices
+left join
+ucfacc3.parameters p on t.ticket_type = p.parameter_subname
+and p.parameter_name = 'price'
+and p.date_created <= t.transaction_time
+
+where t.success_failure = 1
+
+group by
+t.ticket_barrier_id, tb.name, tb.location, currency
+
+order by
+t.ticket_barrier_id;
+
+
+-- entrance profit view, aggregate profits by entrance
+
+create view ucfacc3.entrance_profits as
+
+select
+e.entrance_id,
+e.name as entrance_name,
+-- sum of profits from all barriers at this entrance
+sum(tbp.total_profit) as total_entrance_profit,
+-- get max currency (should be same for all)
+max(tbp.currency) as currency,
+-- sum of tickets sold at this entrance
+sum(tbp.tickets_sold) as total_tickets_sold,
+e.location
+
+from
+ucfacc3.ticket_barriers tb
+left join
+ucfacc3.ticket_barrier_profits tbp on tb.ticket_barrier_id = tbp.ticket_barrier_id
+left join
+ucfacc3.entrances e on e.entrance_id = tb.entrance_id
+
+group by
+e.entrance_id, e.name, e.location
+
+order by 
+e.entrance_id;
+
+
+-- station profit view, aggregates profits by each station
+
+create view ucfacc3.station_profits as
+
+select
+s.station_id,
+s.name as station_name,
+-- sum of profits from all entrances at each station
+sum(ep.total_entrance_profit) as total_station_profit,
+-- get currency
+max(ep.currency) as currency,
+-- sum of tickets sold at station
+sum(ep.total_tickets_sold) as total_tickets_sold
+
+from
+ucfacc3.entrance_profits ep
+left join
+ucfacc3.entrances e on ep.entrance_name = e.name
+left join
+ucfacc3.stations s on s.station_id = e.station_id
+
+group by
+s.station_id, s.name
+
+order by
+s.station_id;
+

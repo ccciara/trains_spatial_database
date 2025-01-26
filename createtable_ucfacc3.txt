@@ -1,0 +1,61 @@
+drop schema if exists ucfacc3 cascade;
+
+create schema ucfacc3;
+
+drop table if exists ucfacc3.stations;
+create table ucfacc3.stations
+(station_id serial not null,
+name varchar(100) not null,
+year_opened integer not null);
+
+select AddGeometryColumn('ucfacc3', 'stations', 'location', 27700, 'polyhedralsurface', 3);
+
+drop table if exists ucfacc3.entrances;
+create table ucfacc3.entrances
+(entrance_id serial not null,
+name varchar(150) not null,
+station_id integer not null);
+
+select AddGeometryColumn('ucfacc3', 'entrances', 'location', 27700, 'polyhedralsurface', 3);
+
+drop table if exists ucfacc3.ticket_barriers;
+create table ucfacc3.ticket_barriers
+(ticket_barrier_id serial not null,
+name varchar not null,
+date_installed date not null,
+model varchar(150) not null,
+entrance_id integer not null);
+
+select AddGeometryColumn('ucfacc3', 'ticket_barriers', 'location', 27700, 'polyhedralsurface', 3);
+
+drop table if exists ucfacc3.transactions;
+create table ucfacc3.transactions
+(transaction_id serial not null,
+transaction_time timestamp not null,
+success_failure integer not null,
+entry_exit integer not null,
+ticket_type varchar(15) not null,
+ticket_barrier_id integer not null,
+customer_id integer not null);
+
+drop table if exists ucfacc3.customers;
+create table ucfacc3.customers
+(customer_id serial not null,
+payment_details varchar(16) not null,
+first_name varchar(20) not null,
+last_name varchar(20) not null,
+address_line_1 varchar(500) not null,
+address_line_2 varchar(500),
+address_line_3 varchar(500),
+post_code varchar(10) not null,
+date_of_birth date not null);
+
+drop table if exists ucfacc3.parameters;
+create table ucfacc3.parameters
+(parameter_id serial,
+parameter_type varchar(150),
+parameter_name varchar(150),
+parameter_subname varchar(150),
+parameter_value double precision,
+parameter_units varchar(150),
+date_created date default current_date);
